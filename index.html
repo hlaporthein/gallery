@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    
+    <div class="container">
+        <div class="column">
+            <a href="images/large-1.jpg">
+                <img title="Image Number 1" src="images/small-1.jpg" alt="">
+            </a>
+        </div>
+        <div class="column">
+            <a href="images/large-2.jpg">
+                <img title="Image Number 2" src="images/small-2.jpg" alt="">
+            </a>
+        </div>
+        <div class="column">
+            <a href="images/large-3.jpg">
+                <img title="Image Number 3" src="images/small-3.jpg" alt="">
+            </a>
+        </div>
+        <div class="column">
+            <a href="images/large-4.jpg">
+                <img title="Image Number 4" src="images/small-4.jpg" alt="">
+            </a>
+        </div>
+        <div class="column">
+            <a href="images/large-5.jpg">
+                <img title="Image Number 5" src="images/small-5.jpg" alt="">
+            </a>
+        </div>
+        <div class="column">
+            <a href="images/large-6.jpg">
+                <img title="Image Number 6" class="gallery" src="images/small-6.jpg" alt="">
+            </a>
+        </div>
+    </div>
+
+    <div class="overlay">
+        <h3 id="title"></h3>
+        <div class="close-btn">x</div>
+        <img src="images/large-1.jpg" alt="">
+        <div id="nav-bar">
+            <button class="previous-btn btn-nav">Previous</button>
+            <button class="next-btn btn-nav">Next</button>
+            <button class="play-btn btn-nav">Play</button>
+        </div>
+    </div>
+
+    <script>
+
+        if (!Element.prototype.matches) {
+        Element.prototype.matches =
+            Element.prototype.msMatchesSelector ||
+            Element.prototype.webkitMatchesSelector;
+        }
+
+        if (!Element.prototype.closest) {
+        Element.prototype.closest = function(s) {
+            var el = this;
+
+            do {
+            if (Element.prototype.matches.call(el, s)) return el;
+            el = el.parentElement || el.parentNode;
+            } while (el !== null && el.nodeType === 1);
+            return null;
+        };
+        }        
+        
+        Element.prototype.lastElementSibling = function() {
+            let element = this;
+            return element.parentElement.lastElementChild;
+        }
+
+        Element.prototype.firstElementSibling = function() {
+            let element = this;
+            return element.parentElement.firstElementChild;
+        }
+
+        //varibles
+        const overlayImage = document.querySelector(".overlay img");
+        const closeBtn = document.querySelector(".close-btn");
+        const previousBtn = document.querySelector(".previous-btn");
+        const nextBtn = document.querySelector(".next-btn");
+        const title = document.querySelector(".overlay #title");
+        const playBtn = document.querySelector(".play-btn");
+
+        function showOverlay(element) {
+            const aTag = element.querySelector("a");
+            const imageElement = aTag.querySelector("img");
+            const imageUrl = aTag.getAttribute('href');
+            const parent = element.parentElement;
+            const oldActiveClass = parent.querySelector(".column.active");
+
+            if ( imageElement.hasAttribute('title') ) {
+                title.textContent = imageElement.getAttribute('title');
+            }
+            
+            if ( imageUrl ) {
+                overlayImage.setAttribute('src', imageUrl);
+                document.body.classList.add('show-overlay');
+            }
+
+            if ( oldActiveClass ) {
+                oldActiveClass.classList.remove('active');
+            }
+
+            element.classList.add('active');
+
+        }
+
+        //close 
+        closeBtn.addEventListener("click", function(){
+            document.body.classList.remove('show-overlay');
+        });
+
+        document.body.addEventListener("keydown", function(event) {
+            if ( event.code === "Escape" ) {
+                document.body.classList.remove('show-overlay');
+            }
+        });
+
+
+        //click image
+        document.addEventListener("click", function(event) {
+
+            const hasColumnClass = event.target.parentElement.parentElement.classList.contains('column');
+            if ( event.target.nodeName === "IMG" &&  hasColumnClass) {
+                const imageElement = event.target;
+                const column = imageElement.closest('.column');
+
+                showOverlay(column);
+            }
+
+            event.preventDefault();
+        });
+
+        //auto play
+        let isPaused = true;
+        setInterval(function(){
+            if ( !isPaused ) {
+                next();
+            }
+        }, 3000);
+        
+        playBtn.addEventListener("click", function(){
+            isPaused = !isPaused;
+            let buttonText = isPaused ? "Play" : "Pause";
+            playBtn.textContent = buttonText;
+        })
+
+        //previous action
+        function previous() {
+            const active = document.querySelector(".column.active");
+            const previousColumn = active.previousElementSibling;
+            
+            if ( previousColumn ) {
+                showOverlay(previousColumn);
+            } else {
+                let last = active.lastElementSibling();
+                showOverlay(last);
+            }            
+        }
+
+
+        //click previous button
+        previousBtn.addEventListener("click", function(event){
+            previous();
+        });
+
+        document.addEventListener("keydown", function(event) {
+            if ( event.key === "ArrowLeft" ) {
+                previous();
+            }
+        });
+
+        //next action
+        function next() {
+            const active = document.querySelector(".column.active");
+            const nextColumn = active.nextElementSibling;
+            
+            if ( nextColumn ) {
+                showOverlay(nextColumn);
+            } else {
+                let first = active.firstElementSibling();
+                showOverlay(first);
+            }            
+        }
+
+        // next button click
+        nextBtn.addEventListener("click", function(event) {
+            next();
+        });
+
+        //keyboard next arrow
+        document.addEventListener("keydown", function(event) {
+            if ( event.key === "ArrowRight" ) {
+                next();
+            }
+        });
+
+    </script>
+</body>
+</html>
